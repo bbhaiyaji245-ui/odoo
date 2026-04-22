@@ -1,0 +1,6 @@
+{
+  "name": "Odoo Master Blog Automator",
+  "description": "AI-driven blog automation system that discovers trends, finds keywords, generates SEO blogs with images, and publishes to Odoo CMS automatically.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

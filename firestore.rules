@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. Common Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // 2. Trend Validation
+    function isValidTrend(data) {
+      return data.title is string && data.title.size() <= 200 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.status in ['pending', 'processing', 'completed', 'failed'] &&
+             data.fetchedAt is string;
+    }
+
+    match /trends/{trendId} {
+      allow read: if isSignedIn();
+      // Server-only writes usually, but for demo we allow authenticated
+      allow create: if isSignedIn() && isValidTrend(incoming());
+      allow update: if isSignedIn() && isValidTrend(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+    }
+
+    // 3. Blog Validation
+    function isValidBlog(data) {
+      return data.title is string && data.title.size() <= 500 &&
+             data.content is string && data.content.size() <= 100000 &&
+             data.status in ['draft', 'published', 'failed'] &&
+             data.createdAt is string;
+    }
+
+    match /blogs/{blogId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidBlog(incoming());
+      allow update: if isSignedIn() && isValidBlog(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasAny(['status', 'odooPostId', 'content', 'publishedAt']);
+      allow delete: if isSignedIn();
+    }
+
+    // 4. Settings Validation
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn(); // Add strict validation if needed
+    }
+  }
+}

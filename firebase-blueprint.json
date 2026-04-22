@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "Trend": {
+      "title": "Trending Topic",
+      "description": "Represents a trending topic fetched from external sources.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "source": { "type": "string" },
+        "fetchedAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "processing", "completed", "failed"] }
+      },
+      "required": ["title", "category", "fetchedAt", "status"]
+    },
+    "Blog": {
+      "title": "Blog Post",
+      "description": "A generated blog post ready for publishing or already published.",
+      "type": "object",
+      "properties": {
+        "trendId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "slug": { "type": "string" },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "metaTitle": { "type": "string" },
+        "metaDescription": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published", "failed"] },
+        "odooPostId": { "type": "string" },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "status", "createdAt"]
+    },
+    "Setting": {
+      "title": "App Settings",
+      "description": "Configuration and automation states.",
+      "type": "object",
+      "properties": {
+        "autoMode": { "type": "boolean" },
+        "lastRun": { "type": "string", "format": "date-time" },
+        "odooConfig": {
+          "type": "object",
+          "properties": {
+            "url": { "type": "string" },
+            "db": { "type": "string" },
+            "username": { "type": "string" },
+            "password": { "type": "string" },
+            "apiKey": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "trends": {
+      "schema": "Trend",
+      "description": "Collection of fetched trending topics."
+    },
+    "blogs": {
+      "schema": "Blog",
+      "description": "Collection of generated and published blogs."
+    },
+    "settings": {
+      "schema": "Setting",
+      "description": "Singleton-like settings document."
+    }
+  }
+}
